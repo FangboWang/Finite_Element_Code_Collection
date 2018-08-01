@@ -133,13 +133,13 @@ function [stress, strain_pl, alpha]=plastic_loading(E, ha, Cr, stress, inc_strai
         df_dsigma=(stress_to_dev(stress)-alpha)/sqrt(J2)/2;
         L=tensorproduct22( tensorproduct42(E, d_inc_strain), df_dsigma);
         d_effective_strain_pl = sqrt(2/3*tensorproduct22(df_dsigma, df_dsigma));
-        kappa=ha*tensorproduct22(df_dsigma, df_dsigma) - Cr*d_effective_strain_pl*tensorproduct22(alpha, df_dsigma);
+        kappa=2/3*ha*tensorproduct22(df_dsigma, df_dsigma) - Cr*d_effective_strain_pl*tensorproduct22(alpha, df_dsigma);
         h=tensorproduct22( tensorproduct42(E, df_dsigma), df_dsigma) + kappa;
         d_inc_strain_pl=L/h*df_dsigma;
         d_stress= tensorproduct42(E, d_inc_strain-d_inc_strain_pl);
         stress=stress+d_stress;
         strain_pl=strain_pl+d_inc_strain_pl;
-        alpha=alpha + ha*d_inc_strain_pl - Cr*alpha*sqrt(2/3*tensorproduct22(d_inc_strain_pl, d_inc_strain_pl));
+        alpha=alpha + 2/3*ha*d_inc_strain_pl - Cr*alpha*sqrt(2/3*tensorproduct22(d_inc_strain_pl, d_inc_strain_pl));
     end
 
 

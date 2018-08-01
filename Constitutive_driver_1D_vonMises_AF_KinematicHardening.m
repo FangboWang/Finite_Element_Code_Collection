@@ -41,12 +41,12 @@ for i=2:length(inc_strain)
            yield_tag=0;
            alpha(i)=alpha(i-1);
         else
-           E_ep=E-E*E/(E+2/3*ha-2/3*Cr*alpha(i-1)*sign(stress(i-1)-alpha(i-1)));
+           E_ep=E-E*E/(E+2/3*ha-Cr*alpha(i-1)*sign(stress(i-1)-alpha(i-1)));
            stress(i)=stress(i-1)+E_ep*inc_strain(i); 
            inc_strain_pl=(1-E_ep/E)*inc_strain(i);
            total_strain_pl(i)=total_strain_pl(i-1) + inc_strain_pl;
            yield_tag=1;
-           alpha(i)=alpha(i-1)+2/3*ha*inc_strain_pl - 2/3*Cr*alpha(i-1)*abs(inc_strain_pl) ;
+           alpha(i)=alpha(i-1)+2/3*ha*inc_strain_pl - Cr*alpha(i-1)*abs(inc_strain_pl) ;
            i
         end
         
