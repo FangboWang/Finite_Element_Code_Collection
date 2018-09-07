@@ -1,9 +1,11 @@
 
+%%%This code is developed based on Waifah Chen's book, 
+%%%Section 5.7, Section 6.5
 
 clc;clear;
 
 
-qn=1e5;  % shear strength in Pa
+qn=1e2;  % shear strength in Pa
 ha=2e7;
 Cr=1000;
 
@@ -36,7 +38,7 @@ for i=1:3
 end
 
 %pure shear strain control for the gauss point
-temp_vector=[1e-4*ones(1,200) -1e-4*ones(1,400) 1e-4*ones(1,400)];
+temp_vector=[1e-5*ones(1,2000) -1e-5*ones(1,4000) 1e-5*ones(1,4000)];
 for i=1:length(temp_vector)
     temp=zeros(3,3);
     stress{i}= temp;   % stress tensor
@@ -66,7 +68,8 @@ for i=2:length(inc_strain)
 
         else
             
-            r = yield_function( stress{i-1}, delta_stress, alpha{i-1}, qn);
+            %r = yield_function( stress{i-1}, delta_stress, alpha{i-1}, qn);
+            r=0.5; % use this line in case of not converging.
             [stress{i}, strain_pl{i}, alpha{i}]=plastic_loading(E, ha, Cr, stress{i-1}+r*delta_stress, inc_strain{i}, strain_pl{i-1}, alpha{i-1});
             strain{i}=strain{i-1}+inc_strain{i};
             yield_tag=1; 
@@ -94,6 +97,7 @@ for i=2:length(inc_strain)
             
         end 
     end
+    i
     
 end
 
@@ -132,14 +136,15 @@ function [stress, strain_pl, alpha]=plastic_loading(E, ha, Cr, stress, inc_strai
         J2=0.5*tensorproduct22(stress_to_dev(stress)-alpha, stress_to_dev(stress)-alpha);
         df_dsigma=(stress_to_dev(stress)-alpha)/sqrt(J2)/2;
         L=tensorproduct22( tensorproduct42(E, d_inc_strain), df_dsigma);
-        d_effective_strain_pl = sqrt(2/3*tensorproduct22(df_dsigma, df_dsigma));
-        kappa=2/3*ha*tensorproduct22(df_dsigma, df_dsigma) - Cr*d_effective_strain_pl*tensorproduct22(alpha, df_dsigma);
+        h_ij = 2/3*ha*df_dsigma - Cr*alpha*sqrt(2/3);
+        kappa=tensorproduct22(h_ij, df_dsigma);
         h=tensorproduct22( tensorproduct42(E, df_dsigma), df_dsigma) + kappa;
-        d_inc_strain_pl=L/h*df_dsigma;
+        d_lambda=L/h;
+        d_inc_strain_pl=d_lambda*df_dsigma;
         d_stress= tensorproduct42(E, d_inc_strain-d_inc_strain_pl);
         stress=stress+d_stress;
         strain_pl=strain_pl+d_inc_strain_pl;
-        alpha=alpha + 2/3*ha*d_inc_strain_pl - Cr*alpha*sqrt(2/3*tensorproduct22(d_inc_strain_pl, d_inc_strain_pl));
+        alpha=alpha + (2/3*ha*df_dsigma - Cr*alpha*sqrt(2/3))*d_lambda;
     end
 
 
